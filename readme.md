@@ -39,7 +39,7 @@ pip install -r requirements.txt
 python manage.py runserver
 ```
 
-##App Usage
+## App Usage
 
 - to create superuser write on terminal inside virtual env
 ```
@@ -56,13 +56,14 @@ and login with credentials of user you created in last step
 - to create accounts use admin page(in last step) and connect them to an user
 
 
-##App Structure
-
+## App Structure
+```
 user ---has---> account (one to one relationship)
+
 table --has--> bookings (can be more than one)
+```
 
-
-
-Tables:
-to get access http://127.0.0.1:8000/table/ with get method, with Json body as in Postman collection
-to add http://127.0.0.1:8000/table/ with post method
+## POSTMAN
+```
+postman collection file in the root directory called--> postman_collection.json
+```
