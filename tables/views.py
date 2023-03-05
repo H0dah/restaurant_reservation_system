@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
 import datetime
+from pytz import timezone
 from django.db.models import Q
 
 
@@ -34,9 +35,13 @@ class GetAvailableTimes(APIView):
 
     def get(self, request, format=None):
         required_seats = request.data["required_seats"]
+        EG = timezone('Africa/Cairo')
+
         table = Table.objects.filter(number_of_seats__gte=required_seats).order_by(
             "number_of_seats").first()
 
+        if not table:
+            return Response("There's no table with required seats", status=status.HTTP_204_NO_CONTENT)
 
         end_of_today = datetime.datetime.combine(
             datetime.datetime.today(), datetime.time(23, 59, 59, 999999))
@@ -47,15 +52,16 @@ class GetAvailableTimes(APIView):
         ).order_by('start').all()
 
         available_times = []
-        time_pointer = datetime.datetime.now().time()
+        time_pointer = EG.localize(datetime.datetime.now())
+
         for book in bookings:
-            book_start_time = book.start.time()
-            book_end_time = book.end.time()
+            book_start_time = book.start
+            book_end_time = book.end
             if book_start_time > time_pointer:
                 available_times.append({
-                    str(time_pointer): book_start_time})
+                    "start": time_pointer, "end": book_start_time})
             time_pointer = book_end_time
 
-        available_times.append({str(time_pointer): end_of_today})
+        available_times.append({"start": time_pointer, "end": end_of_today})
 
         return Response(available_times, status=status.HTTP_200_OK)
